@@ -1,0 +1,28 @@
+# ==========================================
+# Ambientes Virtuais (Python)
+# ==========================================
+.venv/
+venv/
+ENV/
+env/
+
+# ==========================================
+# Arquivos Temporários e Cache do Python
+# ==========================================
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# ==========================================
+# Variáveis de Ambiente (Segurança)
+# ==========================================
+# Ignora qualquer arquivo .env em qualquer pasta ou subpasta do projeto
+**/.env
+.env
+.env.local
+.env.*.local
+
+# Garante explicitamente que os arquivos .env.example SERÃO enviados
+!**/.env.example
+!*.env.example
