@@ -8,6 +8,8 @@ from playwright.async_api import async_playwright
 from dotenv import load_dotenv
 import requests
 
+
+load_dotenv()
 EMAIL_USER = os.getenv('EMAIL_USER')
 EMAIL_PASS = os.getenv('EMAIL_PASS')
 
@@ -123,7 +125,7 @@ def enviar_email_completo(termo_busca, destinatario, caminhos_anexos):
                     subtype=sub_type,
                     filename=os.path.basename(caminho)
                 )
-            print(f"✓ Anexo adicionado: {os.path.basename(caminho)}")
+            print(f" Anexo adicionado: {os.path.basename(caminho)}")
 
     try: 
         print("\nConectando ao servidor SMTP do Gmail...")
