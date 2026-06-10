@@ -83,5 +83,59 @@ async def capturar_produto_savegnago(url_base, seletor_busca, termo_busca, prefi
         
         return arquivos_gerados
 
+def enviar_email_completo(termo_busca, destinatario, caminhos_anexos):
+    """
+    Monta a EmailMessage com o corpo em HTML, adiciona todos os arquivos
+    gerados (PDF e imagem do print) e faz o disparo usando SMTP_SSL.
+    """
+    msg = EmailMessage()
+    msg['Subject'] = f"Seu relatório diário de ofertas - {data}"
+    msg['From'] = EMAIL_USER
+    msg['To'] = destinatario
+
+    corpo_html = f"""
+    <html>
+        <body>
+            <h2 style="color: #1A73E8;">Seu Relatório Diário de Supermercados</h2>
+            <p>Veja as ofertas do dia <strong>{data}</strong> do supermercado Savegnago (Rio Claro).</p>
+            <p>Também realizamos a pesquisa automatizada para o termo solicitado: <strong>"{termo_busca}"</strong>.</p>
+            <hr style="border: 1px solid #eee;">
+            <p style="font-size: 12px; color: #666;">O encarte em PDF e o print da pesquisa foram anexados a este e-mail.</p>
+        </body>
+    </html>
+    """
+    msg.set_content(f"Veja as ofertas do dia {data}. Detalhes da pesquisa para '{termo_busca}' em anexo.")
+    msg.add_alternative(corpo_html, subtype='html')
+
+    # Anexa os arquivos encontrados na lista
+    for caminho in caminhos_anexos:
+        if os.path.exists(caminho):
+            mime_type, _ = mimetypes.guess_type(caminho)
+            if mime_type is None:
+                mime_type = 'application/octet-stream'
+                
+            main_type, sub_type = mime_type.split('/', 1)
+            
+            with open(caminho, 'rb') as f:
+                msg.add_attachment(
+                    f.read(),
+                    maintype=main_type,
+                    subtype=sub_type,
+                    filename=os.path.basename(caminho)
+                )
+            print(f"✓ Anexo adicionado: {os.path.basename(caminho)}")
+
+    try: 
+        print("\nConectando ao servidor SMTP do Gmail...")
+        senha_limpa = EMAIL_PASS.replace(" ", "") if EMAIL_PASS else ""
+        
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(EMAIL_USER, senha_limpa)
+            print('Enviando e-mail...')
+            smtp.send_message(msg)
+        print(' E-mail enviado com sucesso!')
+    except Exception as e:
+        print(f' Erro ao enviar e-mail: {e}')
+
 
         
