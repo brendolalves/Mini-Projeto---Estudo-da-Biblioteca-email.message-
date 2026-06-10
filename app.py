@@ -137,5 +137,50 @@ def enviar_email_completo(termo_busca, destinatario, caminhos_anexos):
     except Exception as e:
         print(f' Erro ao enviar e-mail: {e}')
 
+async def main():
+    # 1. Inputs dinâmicos do usuário
+    destinatario = input('Digite o endereço de email do destinatário: ')
+    produto_procurado = input('Digite o produto que deseja buscar (ex: Azeite de Oliva, Leite, Arroz): ')
+    
+    print_savegnago = "resultado_savegnago.png"
+    folheto_pdf = "ofertas.pdf"
 
+    lista_anexos_finais = []
+
+    # 2. Executa o Download do Folheto PDF
+    print("\n--- INICIANDO DOWNLOAD DO FOLHETO ---")
+    downloader = Folheto()
+    if downloader.baixar_folheto(folheto_pdf):
+        print(" Download concluído, arquivo ofertas.pdf gerado.")
+        lista_anexos_finais.append(folheto_pdf)
+    else:
+        print(" Falha no download do folheto PDF.")
+
+# 3. Executa a busca e captura de tela no Savegnago
+    SELETOR_SAVEGNAGO = "input[placeholder*='buscar'], .vtex-input__input, #downshift-0-input"
+
+    print("\n--- INICIANDO CAPTURA SAVEGNAGO ---")
+    try:
+        # Agora a função retorna uma lista de arquivos
+        prints_gerados = await capturar_produto_savegnago(
+            url_base="https://www.savegnago.com.br/",
+            seletor_busca=SELETOR_SAVEGNAGO,
+            termo_busca=produto_procurado,
+            prefixo_arquivo_print="resultado_savegnago" # Sem o .png no final agora
+        )
+        # Adiciona todos os prints gerados na lista principal de anexos
+        lista_anexos_finais.extend(prints_gerados)
+        
+    except Exception as e:
+        print(f"Falha ao capturar Savegnago: {e}")
+
+    # 4. Dispara o e-mail se houver arquivos anexados
+    if lista_anexos_finais:
+        print("\n--- PREPARANDO ENVIO DO RELATÓRIO ---")
+        enviar_email_completo(produto_procurado, destinatario, lista_anexos_finais)
+    else:
+        print("\nNenhum arquivo (PDF ou Print) foi gerado. O processo foi abortado.")
+
+if __name__ == "__main__":
+    asyncio.run(main())
         
